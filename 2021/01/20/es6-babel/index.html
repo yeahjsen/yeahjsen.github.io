@@ -14,7 +14,7 @@
 <meta property="og:description" content="查看node中已经实现的es6特性 1$ node --v8-optionss | grep harmony 检查运行环境对es6的支持情况 12$ npm install -g es-checker$ es-checker es6转码器Babel的配置.babelrc是Babel的配置文件，存放于项目的根目录下，用于设置转码规则和插件，基本格式如下 12345678&amp;#123;	&quot;pr">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-19T16:02:20.000Z">
-<meta property="article:modified_time" content="2021-01-19T16:20:00.875Z">
+<meta property="article:modified_time" content="2021-01-19T16:27:44.716Z">
 <meta property="article:author" content="JSen">
 <meta property="article:tag" content="front-end">
 <meta name="twitter:card" content="summary">
@@ -110,45 +110,45 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g babel-cli</span><br><span class="line"></span><br><span class="line">$ babel example.js //转码结果输出到标准输出</span><br><span class="line">$ babel example.js -o complied.js // 转码结果输出到complied.js文件中，-o是--out-file的简写</span><br><span class="line">$ babel src -d lib // 整个目录转码输出到指定目录，-d是--out-dir的简写</span><br><span class="line">$ babel src -d lib -s // 指定-s会生成<span class="built_in">source</span> map文件</span><br></pre></td></tr></table></figure>
 <p>安装于项目之中</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save-dev babel-cli</span><br></pre></td></tr></table></figure>
-<p>在package.json中添加scripts命令成员<br>    {<br>        // …<br>        “scripts”: {<br>            “build”: “babel src -d lib”<br>        },<br>    }</p>
+<p>在package.json中添加scripts命令成员</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="attr">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">	<span class="attr">&quot;build&quot;</span>: <span class="string">&quot;babel src -d lib&quot;</span></span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm run build //转码指令</span><br></pre></td></tr></table></figure>
 <p>babel-node是babel-cli自带的命令工具，提供一个支持es6的REPL环境，可以直接运行es6脚本</p>
-<p>babel-register改写了require命令，为其加上一个钩子，每当使用require加载后缀为.js,.jsx,.es和.es6的文件时，就会先用Babel进行转码。<br>    require(“babel-register”); //使用时必须先加载<br>    require(“./index.js”);<br>注：由于是实时转码，所以只适合开发环境</p>
+<p>babel-register改写了require命令，为其加上一个钩子，每当使用require加载后缀为.js,.jsx,.es和.es6的文件时，就会先用Babel进行转码。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span>(<span class="string">&quot;babel-register&quot;</span>); <span class="comment">//使用时必须先加载</span></span><br><span class="line"><span class="built_in">require</span>(<span class="string">&quot;./index.js&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>注：由于是实时转码，所以只适合开发环境</p>
 <p>某些代码需要调用Babel的API进行转码，就要使用babel-core</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save babel-core</span><br></pre></td></tr></table></figure>
-<pre><code>var babel = require(&#39;babel-core&#39;);
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> babel = <span class="built_in">require</span>(<span class="string">&#x27;babel-core&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 字符串转码</span></span><br><span class="line">babel.transform(<span class="string">&#x27;code();&#x27;</span>, options); <span class="comment">// =&gt; &#123; code, map, ast &#125;</span></span><br><span class="line"><span class="comment">//文件异步转码</span></span><br><span class="line">babel.transformFile(<span class="string">&#x27;filename.js&#x27;</span>, options, <span class="function"><span class="keyword">function</span>(<span class="params">err, result</span>) </span>&#123;</span><br><span class="line">	result; <span class="comment">// =&gt; &#123; code, map, ast&#125;</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 文件同步转码</span></span><br><span class="line">babel.transformFileSync(<span class="string">&#x27;filename.js&#x27;</span>, options); <span class="comment">// =&gt; &#123; code, map, ast&#125;</span></span><br><span class="line"><span class="comment">// AST转码</span></span><br><span class="line">babel.transformFromAst(ast, code, options); <span class="comment">// &#123; code, map, ast&#125;</span></span><br><span class="line"></span><br><span class="line">options配置内容参考官方文档(babeljs.io/docs/usage/options/)</span><br></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> es6Code = <span class="string">&#x27;let x = n =&gt; n + 1&#x27;</span>;</span><br><span class="line"><span class="keyword">var</span> es5Code = <span class="built_in">require</span>(<span class="string">&#x27;babel-core&#x27;</span>).transform(es6Code, &#123;</span><br><span class="line">	presets: [<span class="string">&#x27;latest&#x27;</span>]</span><br><span class="line">&#125;).code; <span class="comment">// &#x27;&quot;use strict&quot;; \n\nvar x = function x(n) &#123;\n return n + 1; \n&#125;;&#x27;</span></span><br></pre></td></tr></table></figure>
 
-// 字符串转码
-babel.transform(&#39;code();&#39;, options); // =&gt; &#123; code, map, ast &#125;
-//文件异步转码
-babel.transformFile(&#39;filename.js&#39;, options, function(err, result) &#123;
-    result; // =&gt; &#123; code, map, ast&#125;
-&#125;);
-// 文件同步转码
-babel.transformFileSync(&#39;filename.js&#39;, options); // =&gt; &#123; code, map, ast&#125;
-// AST转码
-babel.transformFromAst(ast, code, options); // &#123; code, map, ast&#125;
-
-options配置内容参考官方文档(babeljs.io/docs/usage/options/)</code></pre>
-<p>示例：<br>    var es6Code = ‘let x = n =&gt; n + 1’;<br>    var es5Code = require(‘babel-core’).transform(es6Code, {<br>        presets: [‘latest’]<br>    }).code; // ‘“use strict”; \n\nvar x = function x(n) {\n return n + 1; \n};’</p>
 <p>Babel默认只转换新的javascript语法，而不转换新的API，如Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise等全局对象及定义在全局对象上的方法。<br>如ES6上Array对象新增的Array.from方法，Babel就不会转码。这时想这个方法运行，须使用babel-polyfill为当前环境提供一个垫片。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save babel-polyfill</span><br></pre></td></tr></table></figure>
-<p>脚本头部添加如下代码<br>    import ‘babel-polyfill’;<br>或者<br>    require(‘babel-polyfill’);</p>
+<p>脚本头部添加如下代码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&#x27;babel-polyfill&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span>(<span class="string">&#x27;babel-polyfill&#x27;</span>);</span><br></pre></td></tr></table></figure>
 <p>可通过查看babel-plugin-transform-runtime模块的definition.js文件查看Babel默认不转码的API。</p>
 <p>babel也可用于浏览器环境，Babel6.0版本以后需要使用构建工具构建出来<br>以Babel配合Browserify为例，首先安装babelify模块</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save-dev babelify babel-preset-latest</span><br><span class="line"></span><br><span class="line">$ browserify script.js -o bundle.js -t [ babelify --presets [ latest ] ] //将ES6脚本script.js转为bundle.js以供浏览器加载使用</span><br></pre></td></tr></table></figure>
-<p>在package.json中添加如下代码，则不必每次都输入参数。<br>    {<br>        “browserify”: {<br>            “transform”: [[“babellify”, { “presets”: [“latest”] }]]<br>        }<br>    }</p>
+<p>在package.json中添加如下代码，则不必每次都输入参数。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;browserify&quot;</span>: &#123;</span><br><span class="line">		<span class="attr">&quot;transform&quot;</span>: [[<span class="string">&quot;babellify&quot;</span>, &#123; <span class="attr">&quot;presets&quot;</span>: [<span class="string">&quot;latest&quot;</span>] &#125;]]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>Babel与ESLint的配合使用</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save-dev eslint babel-eslint</span><br></pre></td></tr></table></figure>
-<p>项目根目录下新建.eslintrc,加入parser字段<br>    {<br>        “parser”: “babel-eslint”,<br>        “rules”: {<br>            // …<br>        }<br>    }</p>
-<p>package.json文件中加入相应scripts脚本<br>    {<br>        // …<br>        “scripts”: {<br>            “lint”: “eslint my-files.js”<br>        },<br>        // …<br>    }</p>
-<p>Babel与Mocha的配合使用<br>package.json中修改scripts.test<br>    {<br>        // …<br>        “scripts”: {<br>            “test”: “mocha –ui qunit” –compilers js:babel-core/register<br>        },<br>        // …<br>    }</p>
+<p>项目根目录下新建.eslintrc,加入parser字段</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;parser&quot;</span>: <span class="string">&quot;babel-eslint&quot;</span>,</span><br><span class="line">	<span class="attr">&quot;rules&quot;</span>: &#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>package.json文件中加入相应scripts脚本</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="attr">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">		<span class="attr">&quot;lint&quot;</span>: <span class="string">&quot;eslint my-files.js&quot;</span></span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Babel与Mocha的配合使用<br>package.json中修改scripts.test</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="attr">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">		<span class="attr">&quot;test&quot;</span>: <span class="string">&quot;mocha --ui qunit&quot;</span> --compilers js:babel-core/register	</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>–compilers指定脚本的转码器，规定后缀.js的文件都要使用babel-core/register先进行转码</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/20/es6-babel/" data-id="ckk47ecsq00000a91ehq4aosv" data-title="es6-babel" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/20/es6-babel/" data-id="ckk47o2h800001f915jfu6asp" data-title="es6-babel" class="article-share-link">Share</a>
       
       
       
